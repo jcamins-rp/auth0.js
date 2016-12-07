@@ -41,6 +41,13 @@ function WebAuth(options) {
   this.popup = new Popup(this.client, this.baseOptions);
 }
 
+/**
+ * Parse the url hash and extract the access token or id token depending on the transaction.
+ *
+ * @method parseHash
+ * @param {String, Optional} hash: the url hash or null to automatically extract from window.location.hash
+ * @param {Object, Optional} options: state and nonce can be provided to verify the response
+ */
 WebAuth.prototype.parseHash = function (hash, options) {
   var parsedQs;
   var err;
@@ -90,6 +97,14 @@ WebAuth.prototype.parseHash = function (hash, options) {
   };
 };
 
+/**
+ * Decodes the id_token and verifies  the nonce.
+ *
+ * @method validateToken
+ * @param {String, Optional} token
+ * @param {String, Optional} state
+ * @param {String, Optional} nonce
+ */
 WebAuth.prototype.validateToken = function (token, state, nonce) {
   var audiences;
   var transaction;
@@ -125,6 +140,13 @@ WebAuth.prototype.validateToken = function (token, state, nonce) {
   };
 };
 
+/**
+ * Executes a silent authentication transaction under the hood in order to fetch a new token.
+ *
+ * @method renewAuth
+ * @param {Object} options: any valid oauth2 parameter to be sent to the `/authorize` endpoint
+ * @param {Function} cb
+ */
 WebAuth.prototype.renewAuth = function (options, cb) {
   var handler;
   var prof;
@@ -172,18 +194,49 @@ WebAuth.prototype.renewAuth = function (options, cb) {
   });
 };
 
+/**
+ * Initialices a change password transaction
+ *
+ * @method changePassword
+ * @param {Object} options: https://auth0.com/docs/api/authentication#!#post--dbconnections-change_password
+ * @param {Function} cb
+ */
 WebAuth.prototype.changePassword = function (options, cb) {
   return this.client.dbConnection.changePassword(options, cb);
 };
 
+/**
+ * Initialices a passwordless authentication transaction
+ *
+ * @method passwordlessStart
+ * @param {Object} options: https://auth0.com/docs/api/authentication#passwordless
+ *                    - type: `sms` or `email`
+ *                    - phoneNumber: only if type = sms
+ *                    - email: only if type = email
+ * @param {Function} cb
+ */
 WebAuth.prototype.passwordlessStart = function (options, cb) {
   return this.client.passwordless.start(options, cb);
 };
 
+/**
+ * Signs up a new user
+ *
+ * @method signup
+ * @param {Object} options: https://auth0.com/docs/api/authentication#!#post--dbconnections-signup
+ * @param {Function} cb
+ */
 WebAuth.prototype.signup = function (options, cb) {
   return this.client.dbConnection.signup(options, cb);
 };
 
+/**
+ * Redirects to the hosted login page (`/authorize`) in order to initialize a new authN/authZ transaction
+ *
+ * @method login
+ * @param {Object} options: https://auth0.com/docs/api/authentication#!#get--authorize_db
+ * @param {Function} cb
+ */
 WebAuth.prototype.login = function (options) {
   var params = objectHelper.merge(this.baseOptions, [
     'clientID',
@@ -199,10 +252,28 @@ WebAuth.prototype.login = function (options) {
   windowHelper.redirect(this.client.buildAuthorizeUrl(params));
 };
 
+/**
+ * Redirects to the auth0 logout page
+ *
+ * @method logout
+ * @param {Object} options: https://auth0.com/docs/api/authentication#!#get--v2-logout
+ */
 WebAuth.prototype.logout = function (options) {
   windowHelper.redirect(this.client.buildLogoutUrl(options));
 };
 
+/**
+ * Verifies the passwordless TOTP and redirects to finish the passwordless transaction
+ *
+ * @method logout
+ * @param {Object} options:
+ *                    - type: `sms` or `email`
+ *                    - phoneNumber: only if type = sms
+ *                    - email: only if type = email
+ *                    - connection: the connection name
+ *                    - verificationCode: the TOTP code
+ * @param {Function} cb
+ */
 WebAuth.prototype.passwordlessVerify = function (options, cb) {
   var _this = this;
   return this.client.passwordless.verify(options, function (err) {
