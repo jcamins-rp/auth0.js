@@ -265,7 +265,7 @@ WebAuth.prototype.logout = function (options) {
 /**
  * Verifies the passwordless TOTP and redirects to finish the passwordless transaction
  *
- * @method logout
+ * @method passwordlessVerify
  * @param {Object} options:
  *                    - type: `sms` or `email`
  *                    - phoneNumber: only if type = sms
