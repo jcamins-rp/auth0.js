@@ -549,7 +549,7 @@ Auth0.prototype.parseHash = function (hash, options) {
 
     var nonce;
 
-    if (options.nonce) {
+    if (typeof options.nonce !== 'undefined') {
       nonce = options.nonce;
     } else if (window.localStorage) {
       try {
